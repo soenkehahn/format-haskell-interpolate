@@ -1,6 +1,6 @@
 module Main where
 
-import Format (format)
+import Format (run)
 
 main :: IO ()
-main = interact format
+main = run

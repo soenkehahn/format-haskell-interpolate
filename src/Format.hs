@@ -1,4 +1,16 @@
-module Format (format) where
+{-# LANGUAGE ScopedTypeVariables #-}
+
+module Format (run, format) where
+
+import Control.Monad
+import System.IO (readFile')
+import WithCli
+
+run :: IO ()
+run = withCli $ \(files :: [FilePath]) -> do
+  forM_ files $ \file -> do
+    content <- readFile' file
+    writeFile file $ format content
 
 format :: String -> String
 format = unlines . go False . lines

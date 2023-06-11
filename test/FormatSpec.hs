@@ -1,7 +1,9 @@
 module FormatSpec where
 
-import Format (format)
+import Format (format, run)
+import System.Environment
 import Test.Hspec
+import Test.Mockery.Directory
 
 spec :: Spec
 spec = do
@@ -50,4 +52,20 @@ spec = do
 
   describe "run" $ do
     it "applies the formatting to a given file" $ do
-      pending
+      inTempDirectory $ do
+        writeFile "file" $
+          unlines
+            [ "[i|",
+              "foo",
+              "bar",
+              "|]"
+            ]
+        withArgs ["file"] run
+        let expected =
+              unlines
+                [ "[i|",
+                  "  foo",
+                  "  bar",
+                  "|]"
+                ]
+        readFile "file" `shouldReturn` expected
