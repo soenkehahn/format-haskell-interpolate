@@ -38,6 +38,23 @@ spec = do
               ]
       format input `shouldBe` expected
 
+    it "formats interpolated strings that are indented as a whole" $ do
+      let input =
+            unlines
+              [ " [i|",
+                " foo",
+                " bar",
+                " |]"
+              ]
+          expected =
+            unlines
+              [ " [i|",
+                "   foo",
+                "   bar",
+                " |]"
+              ]
+      format input `shouldBe` expected
+
     it "preserves indentation outside of interpolated strings" $ do
       pending
 
