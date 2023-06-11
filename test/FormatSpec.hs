@@ -47,3 +47,7 @@ spec = do
 
     it "works for interpolated strings that don't have the opening string on a separate line" $ do
       pending
+
+  describe "run" $ do
+    it "applies the formatting to a given file" $ do
+      pending

@@ -1,7 +1,7 @@
 list:
   just --list
 
-ci: hpack fmt test
+ci: hpack fmt test nix-build
 
 fmt: fmt-nix fmt-haskell
 
@@ -23,3 +23,6 @@ test: hpack
 
 watch *args="": hpack
   ghcid --command "cabal repl test:spec" --test ':main {{ args }}' --warnings
+
+nix-build:
+  nix -L build

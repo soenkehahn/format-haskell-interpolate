@@ -20,8 +20,8 @@ tests:
       - hspec-discover
 
 executables:
-  format-haskell-interpolate:
-    main: format-haskell-interpolate.hs
+  fhi:
+    main: fhi.hs
     source-dirs:
       - exe
       - src
