@@ -1,0 +1,27 @@
+version: 0.0.0.0
+
+dependencies:
+  - base
+
+ghc-options:
+  - -Wall
+  - -Wno-name-shadowing
+
+tests:
+  spec:
+    main: Spec.hs
+    source-dirs:
+      - test
+      - src
+    ghc-options:
+      - -fdefer-typed-holes
+    dependencies:
+      - hspec
+      - hspec-discover
+
+executables:
+  format-haskell-interpolate:
+    main: format-haskell-interpolate.hs
+    source-dirs:
+      - exe
+      - src
