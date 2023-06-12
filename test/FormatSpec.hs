@@ -102,9 +102,26 @@ spec = around_ wrapTest $ do
       format "<test-file>" input `shouldBe` expected
 
     it "preserves relative indentation in interpolated strings " $ do
-      pending
+      let input =
+            unlines
+              [ "[i|",
+                "  foo",
+                "    bar",
+                "|]"
+              ]
+          expected =
+            unlines
+              [ "[i|",
+                "  foo",
+                "    bar",
+                "|]"
+              ]
+      format "<test-file>" input `shouldBe` expected
 
     it "unindents when indentation is bigger than 2 spaces" $ do
+      pending
+
+    it "doesn't get tripped up by empty lines" $ do
       pending
 
     it "works for interpolated strings that don't have the opening string on a separate line" $ do

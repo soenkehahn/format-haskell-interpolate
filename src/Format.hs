@@ -5,6 +5,7 @@
 
 module Format (run, format) where
 
+import Control.Lens
 import Control.Monad
 import Data.Void (Void)
 import Debug.Trace (traceShowId)
@@ -32,9 +33,18 @@ data Snippet
   = Line String
   | IString
       { baseIndentation :: Int,
-        content :: [String]
+        content :: [IStringLine]
       }
   deriving stock (Show)
+
+data IStringLine = IStringLine
+  { _lineIndentation :: Int,
+    lineContents :: String
+  }
+  deriving stock (Show)
+
+lineIndentation :: Lens' IStringLine Int
+lineIndentation = lens _lineIndentation (\l n -> l {_lineIndentation = n})
 
 snippets :: Parser [Snippet]
 snippets = manyTill (iString <|> (Line <$> line)) eof
@@ -51,9 +61,22 @@ iString = do
         (manyTill (char ' ') (chunk "[i|\n"))
   content <-
     manyTill
-      (skipMany (char ' ') >> line)
+      iStringLine
       (try (manyTill (char ' ') (chunk "|]\n")))
-  return $ IString baseIndentation content
+  return $ IString baseIndentation (normalizeIndentation content)
+
+iStringLine :: Parser IStringLine
+iStringLine = do
+  indentation <- length <$> takeWhileP Nothing (== ' ')
+  IStringLine indentation <$> line
+
+normalizeIndentation :: [IStringLine] -> [IStringLine]
+normalizeIndentation lines =
+  map
+    (lineIndentation %~ subtract minimalIndentation)
+    lines
+  where
+    minimalIndentation = minimum $ map (^. lineIndentation) lines
 
 render :: [Snippet] -> String
 render = concatMap $ \case
@@ -63,9 +86,12 @@ render = concatMap $ \case
       fmap
         (nTimes baseIndentation indent)
         ( ["[i|"]
-            ++ map (nTimes 2 indent) content
+            ++ map (nTimes 2 indent . renderIStringLine) content
             ++ ["|]"]
         )
+
+renderIStringLine :: IStringLine -> String
+renderIStringLine (IStringLine indentation s) = nTimes indentation indent s
 
 indent :: String -> String
 indent = (" " <>)
