@@ -8,7 +8,6 @@ module Format (run, format) where
 import Control.Lens
 import Control.Monad
 import Data.Void (Void)
-import Debug.Trace (traceShowId)
 import System.IO (readFile')
 import Text.Megaparsec
 import Text.Megaparsec.Char
@@ -23,7 +22,6 @@ run = withCli $ \(files :: [FilePath]) -> do
 format :: FilePath -> String -> String
 format file =
   render
-    . traceShowId
     . either (error . errorBundlePretty) id
     . parse snippets file
 
