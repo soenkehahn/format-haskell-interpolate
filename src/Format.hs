@@ -76,7 +76,12 @@ normalizeIndentation lines =
     (lineIndentation %~ subtract minimalIndentation)
     lines
   where
-    minimalIndentation = minimum $ map (^. lineIndentation) lines
+    minimalIndentation =
+      let indentations =
+            map (^. lineIndentation) $
+              filter ((/= "") . lineContents) $
+                lines
+       in minimum indentations
 
 render :: [Snippet] -> String
 render = concatMap $ \case
@@ -84,19 +89,24 @@ render = concatMap $ \case
   IString baseIndentation content ->
     unlines $
       fmap
-        (nTimes baseIndentation indent)
+        (nTimes baseIndentation indentLine)
         ( ["[i|"]
-            ++ map (nTimes 2 indent . renderIStringLine) content
+            ++ map
+              (nTimes 2 indentLine . renderIStringLine)
+              content
             ++ ["|]"]
         )
 
 renderIStringLine :: IStringLine -> String
-renderIStringLine (IStringLine indentation s) = nTimes indentation indent s
+renderIStringLine (IStringLine indentation s) = nTimes indentation indentLine s
 
-indent :: String -> String
-indent = (" " <>)
+indentLine :: String -> String
+indentLine = \case
+  "" -> ""
+  l -> " " <> l
 
 nTimes :: Int -> (a -> a) -> a -> a
-nTimes n f x = case n of
-  0 -> x
-  n -> nTimes (n - 1) f (f x)
+nTimes n f x =
+  if n <= 0
+    then x
+    else nTimes (n - 1) f (f x)
