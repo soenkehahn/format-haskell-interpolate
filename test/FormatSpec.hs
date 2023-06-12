@@ -152,6 +152,21 @@ spec = around_ wrapTest $ do
               ]
       show (format "<test-file>" input) `shouldBe` show expected
 
+    it "works for interpolated strings with just empty lines" $ do
+      let input =
+            unlines
+              [ "[i|",
+                "",
+                "|]"
+              ]
+          expected =
+            unlines
+              [ "[i|",
+                "",
+                "|]"
+              ]
+      show (format "<test-file>" input) `shouldBe` show expected
+
     it "works for interpolated strings that don't have the opening string on a separate line" $ do
       pending
 

@@ -81,7 +81,9 @@ normalizeIndentation lines =
             map (^. lineIndentation) $
               filter ((/= "") . lineContents) $
                 lines
-       in minimum indentations
+       in case indentations of
+            [] -> 0
+            _ -> minimum indentations
 
 render :: [Snippet] -> String
 render = concatMap $ \case
@@ -98,7 +100,8 @@ render = concatMap $ \case
         )
 
 renderIStringLine :: IStringLine -> String
-renderIStringLine (IStringLine indentation s) = nTimes indentation indentLine s
+renderIStringLine (IStringLine indentation s) =
+  nTimes indentation indentLine s
 
 indentLine :: String -> String
 indentLine = \case
