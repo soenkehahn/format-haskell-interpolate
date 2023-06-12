@@ -1,34 +1,76 @@
+{-# LANGUAGE DerivingStrategies #-}
+{-# LANGUAGE ImportQualifiedPost #-}
+{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 
 module Format (run, format) where
 
 import Control.Monad
-import Data.Char (isSpace)
+import Data.Void (Void)
+import Debug.Trace (traceShowId)
 import System.IO (readFile')
+import Text.Megaparsec
+import Text.Megaparsec.Char
 import WithCli
 
 run :: IO ()
 run = withCli $ \(files :: [FilePath]) -> do
   forM_ files $ \file -> do
     content <- readFile' file
-    writeFile file $ format content
+    writeFile file $ format file content
 
-format :: String -> String
-format = unlines . go False . lines
+format :: FilePath -> String -> String
+format file =
+  render
+    . traceShowId
+    . either (error . errorBundlePretty) id
+    . parse snippets file
 
-go :: Bool -> [String] -> [String]
-go insideInterpolate (line : rest)
-  | isStarter line = line : go True rest
-  | isEnd line = line : go False rest
-  | insideInterpolate = ("  " <> line) : go True rest
-  | otherwise = line : go insideInterpolate rest
-go _ [] = []
+type Parser = Parsec Void String
 
-isStarter :: String -> Bool
-isStarter = (== "[i|") . trim
+data Snippet
+  = Line String
+  | IString
+      { baseIndentation :: Int,
+        content :: [String]
+      }
+  deriving stock (Show)
 
-isEnd :: String -> Bool
-isEnd = (== "|]") . trim
+snippets :: Parser [Snippet]
+snippets = manyTill (iString <|> (Line <$> line)) eof
 
-trim :: String -> String
-trim = dropWhile isSpace . reverse . dropWhile isSpace . reverse
+line :: Parser String
+line =
+  manyTill anySingle eol
+
+iString :: Parser Snippet
+iString = do
+  baseIndentation <-
+    length
+      <$> try
+        (manyTill (char ' ') (chunk "[i|\n"))
+  content <-
+    manyTill
+      (skipMany (char ' ') >> line)
+      (try (manyTill (char ' ') (chunk "|]\n")))
+  return $ IString baseIndentation content
+
+render :: [Snippet] -> String
+render = concatMap $ \case
+  Line line -> line <> "\n"
+  IString baseIndentation content ->
+    unlines $
+      fmap
+        (nTimes baseIndentation indent)
+        ( ["[i|"]
+            ++ map (nTimes 2 indent) content
+            ++ ["|]"]
+        )
+
+indent :: String -> String
+indent = (" " <>)
+
+nTimes :: Int -> (a -> a) -> a -> a
+nTimes n f x = case n of
+  0 -> x
+  n -> nTimes (n - 1) f (f x)

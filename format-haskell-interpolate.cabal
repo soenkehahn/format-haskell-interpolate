@@ -20,6 +20,7 @@ executable fhi
   build-depends:
       base
     , getopt-generics
+    , megaparsec
   default-language: Haskell2010
 
 test-suite spec
@@ -38,5 +39,6 @@ test-suite spec
     , getopt-generics
     , hspec
     , hspec-discover
+    , megaparsec
     , mockery
   default-language: Haskell2010
