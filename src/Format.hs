@@ -25,6 +25,8 @@ format file =
     . either (error . errorBundlePretty) id
     . parse snippets file
 
+-- trigger build
+
 type Parser = Parsec Void String
 
 data Snippet
