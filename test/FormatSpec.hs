@@ -159,13 +159,13 @@ spec = around_ wrapTest $ do
                 "",
                 "|]"
               ]
-          expected =
+          foo =
             unlines
               [ "[i|",
                 "",
                 "|]"
               ]
-      show (format "<test-file>" input) `shouldBe` show expected
+      show (format "<test-file>" input) `shouldBe` show foo
 
     it "works for interpolated strings that don't have the opening string on a separate line" $ do
       pending
