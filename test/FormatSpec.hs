@@ -8,7 +8,7 @@ import Test.Mockery.Directory
 
 wrapTest :: IO () -> IO ()
 wrapTest test = do
-  result <- timeout 200001 test
+  result <- timeout 200002 test
   case result of
     Nothing -> error "timeout"
     Just () -> return ()
